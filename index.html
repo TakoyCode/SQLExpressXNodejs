@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Testing API</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <script>
+        // Tester Get
+        let test = GetData('http://localhost:3000/');
+        console.log(test);
+
+        updateView();
+        async function updateView() {
+            const app = document.getElementById("app")
+            app.innerHTML = await test;
+        }
+
+        async function GetData(route) {
+            let response = await axios.get(route);
+            console.log(response);
+            console.log(response.data);
+            return response.data;
+        }
+    </script>
+</body>
+
+</html>
