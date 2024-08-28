@@ -113,9 +113,6 @@ app.delete('/api/users/:id', (req, res) => {
     });
 });
 
-const port = process.env.PORT | 3000;
-app.listen(port, () => { console.log(`Listening on port ${port}...`) });
-
 function ValidateUser(user) {
     const schema = Joi.object({
         Name: Joi.string().required(),
@@ -124,3 +121,7 @@ function ValidateUser(user) {
     });
     return schema.validate(user);
 }
+
+const port = process.env.PORT | 3000;
+app.listen(port, () => { console.log(`Listening on port ${port}...`) });
+
