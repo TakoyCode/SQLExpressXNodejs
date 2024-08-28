@@ -20,6 +20,19 @@ app.get('/api/courses', (req, res) => {
     res.send(courses);
 });
 
+app.get('/api/courses/:id', (req, res) => {
+    const course = courses.find((c) => (c.id === parseInt(req.params.id)));
+
+    // Sender en status kode med verdien 404, når den ikke finner en course med den id-en
+    if (!course) return res.status(404).send('The course with the given ID was not found.')
+    res.send(course);
+
+    // courses.forEach((c) => {
+    //     if (c.id == req.params.id) res.send(c);
+    // });
+    // const index = req.params.id - 1;
+    // res.send(courses[index]);
+});
 
 app.post('/api/courses/old', (req, res) => {
 
@@ -48,20 +61,6 @@ app.post('/api/courses/old', (req, res) => {
 
     courses.push(course);
     res.send(course);
-});
-
-app.get('/api/courses/:id', (req, res) => {
-    const course = courses.find((c) => (c.id === parseInt(req.params.id)));
-
-    // Sender en status kode med verdien 404, når den ikke finner en course med den id-en
-    if (!course) return res.status(404).send('The course with the given ID was not found.')
-    res.send(course);
-
-    // courses.forEach((c) => {
-    //     if (c.id == req.params.id) res.send(c);
-    // });
-    // const index = req.params.id - 1;
-    // res.send(courses[index]);
 });
 
 app.post('/api/courses', (req, res) => {
