@@ -48,7 +48,7 @@ app.post('/api/users', (req, res) => {
 
     // Create new user in users table
     const request = new sql.Request();
-    request.query(`INSERT INTO users (Name, Age, Email) VALUES ('${Name}', ${Age}, '${Email}'); SELECT SCOPE_IDENTITY() AS ID; `, (error, result) => {
+    request.query(`INSERT INTO users (Name, Age, Email) VALUES ('${Name}', ${Age}, '${Email}'); SELECT SCOPE_IDENTITY() AS ID;`, (error, result) => {
         // Checks for error
         if (error) return res.status(400).send(error.message);
 
@@ -70,13 +70,28 @@ app.post('/api/users', (req, res) => {
 });
 
 app.put('/api/users/:id', (req, res) => {
+    // Validates the data
+    const { error } = ValidateUser(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    // Creates a object with the data
     const { Name, Age, Email } = req.body;
 
     const request = new sql.Request();
-    request.query(`UPDATE users SET Name = '${Name}', Age = ${Age}, Email = '${Email}' Where ID = ${req.params.id};`, (error, result) => {
-        if (error) res.status(400).send(error.message);
-        else res.send(result);
-        console.log(result);
+    request.query(`select * from users where Id = ${req.params.id}`, (error, result) => {
+        // Check if we got a user
+        if (result.rowsAffected <= 0) return res.status(404).send('Could not find user.');
+
+        // Update user
+        request.query(`UPDATE users SET Name = '${Name}', Age = ${Age}, Email = '${Email}' Where ID = ${req.params.id};`, (error, result) => {
+            if (error) return res.status(400).send(error.message);
+
+            // Sends updated user back
+            request.query(`select * from users where Id = ${req.params.id}`, (error, result) => {
+                if (error) return res.status(404).send(error.message);
+                res.send(result.recordset[0]);
+            });
+        });
     });
 });
 
