@@ -2,6 +2,7 @@ const Joi = require('joi');
 const sql = require('mssql');
 const express = require('express');
 require('dotenv').config();
+console.log(process.env.NODE_ENV)
 
 const app = express();
 app.use(express.json());
@@ -110,5 +111,5 @@ function ValidateUser(user) {
     return schema.validate(user);
 }
 
-const port = process.env.PORT | 3000;
+const port = process.env.PORT || 5000;
 app.listen(port, () => { console.log(`Listening on port ${port}...`) });
