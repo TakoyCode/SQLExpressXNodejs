@@ -1,35 +1,17 @@
 const express = require('express');
 const Joi = require('joi');
 
-
 const app = express();
 app.use(express.json());
 
-const sql = require('mssql');
-require('dotenv').config();
-const sqlConfig = {
-    user: process.env.SQLUSER,
-    password: process.env.SQLPASS,
-    database: process.env.DATABASE,
-    server: process.env.SERVER,
-    options: {
-        trustServerCertificate: true, //true for local dev / self-signed certs
-    }
-}
+// Connect to database
+const { sql, connectToDatabase, closeConnection, } = require('./db');
 
-sql.connect(sqlConfig, (error) => {
-    if (error) console.error(error);
-    else console.log('Connected to database.');
-});//
-
-// Makes a connection to the SQL express server
-// const sql = require('./db');
-
-app.get('/api/users', (req, res) => {
+app.get('/api/users', async (req, res) => {
     const request = new sql.Request();
-    request.query('select * from users', (error, result) => {
-        console.log(error); // HER ER TEST FEILEN
-        if (error) return res.status(207).send(error.message);
+    await request.query('select * from users', (error, result) => {
+        // console.log(error); // HER ER TEST FEILEN
+        if (error) return res.status(400).send(error.message);
         res.send(result.recordset);
     });
 });
@@ -114,6 +96,4 @@ function ValidateUser(user) {
     return schema.validate(user);
 }
 
-module.exports = app;
-// const port = process.env.PORT || 5000;
-// app.listen(port, () => { console.log(`Listening on port ${port}...`) });
+module.exports = { app, connectToDatabase, closeConnection, };

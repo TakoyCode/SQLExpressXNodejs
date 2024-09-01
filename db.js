@@ -1,8 +1,6 @@
 const sql = require('mssql');
 require('dotenv').config();
 
-// console.log("kom inni db")
-
 const sqlConfig = {
     user: process.env.SQLUSER,
     password: process.env.SQLPASS,
@@ -13,9 +11,23 @@ const sqlConfig = {
     }
 }
 
-sql.connect(sqlConfig, (error) => {
-    if (error) console.error(error);
-    else console.log('Connected to database.');
-});
+async function connectToDatabase() {
+    try {
+        await sql.connect(sqlConfig);
+        console.log('Connected to database.');
+    }
+    catch (error) {
+        console.error(error);
+    }
+    // sql.connect(sqlConfig, (error) => {
+    //     if (error) console.error(error);
+    //     else console.log('Connected to database.');
+    // });
+}
 
-module.exports = sql;
+async function closeConnection() {
+    await sql.close();
+    console.log('Closed connection to the database.');
+}
+
+module.exports = { sql, connectToDatabase, closeConnection, };
