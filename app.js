@@ -1,22 +1,88 @@
+// Setting up express
 const express = require('express');
-const Joi = require('joi');
-
 const app = express();
 app.use(express.json());
 
-// Connect to database
-const { sql } = require('./db');
-// const { sql, connectToDatabase, closeConnection, } = require('./db');
+// importing Joi
+const Joi = require('joi');
 
+// importing database
+const { sql } = require('./db');
+
+// Setting up swagger
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
+
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'SQL Express X Node.js',
+            version: '1.0.0',
+        },
+        servers: [
+            {
+                url: 'http://localhost:3000/',
+            }
+        ],
+    },
+    apis: ['./app.js'],
+}
+
+const swaggerSpec = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+
+// --- HTTP methods ---
+
+/**
+ * @swagger
+ * /api/users:
+ *  get:
+ *      summary: To get users from SQL Express Database
+ *      description: To get users from SQL Express Database
+ *      responses:
+ *          200:
+ *              description: Succesfully got users from the SQL Express Database
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: './swaggerComponents.js/#components/schema/User'
+ *              
+ */
 app.get('/api/users', async (req, res) => {
     const request = new sql.Request();
     await request.query('select * from users', (error, result) => {
-        // console.log(error); // HER ER TEST FEILEN
         if (error) return res.status(400).send(error.message);
         res.send(result.recordset);
     });
 });
 
+/**
+ * @swagger
+ * /api/users/{id}:
+ *  get:
+ *      summary: To get a user from SQL Express Database
+ *      description: To get a user from SQL Express Database
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: Number ID required
+ *            schema:
+ *              type: integer
+ *      responses:
+ *          200:
+ *              description: Succesfully got a user from the SQL Express Database
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: './swaggerComponents.js/#components/schema/User'
+ *          204:
+ *              description: Could not find user in the SQL Express Database
+ */
 app.get('/api/users/:id', (req, res) => {
     const request = new sql.Request();
     request.query(`select * from users where Id = ${req.params.id}`, (error, result) => {
@@ -88,6 +154,7 @@ app.delete('/api/users/:id', (req, res) => {
     });
 });
 
+// Validation logic
 function ValidateUser(user) {
     const schema = Joi.object({
         Name: Joi.string().required(),
