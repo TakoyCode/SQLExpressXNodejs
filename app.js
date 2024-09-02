@@ -5,7 +5,8 @@ const app = express();
 app.use(express.json());
 
 // Connect to database
-const { sql, connectToDatabase, closeConnection, } = require('./db');
+const { sql } = require('./db');
+// const { sql, connectToDatabase, closeConnection, } = require('./db');
 
 app.get('/api/users', async (req, res) => {
     const request = new sql.Request();
@@ -41,7 +42,7 @@ app.post('/api/users', (req, res) => {
         if (error) return res.status(400).send(error.message);
 
         // Sends the inputed user back
-        res.send(result.recordset[0]);
+        res.status(201).send(result.recordset[0]);
     });
 });
 
@@ -96,4 +97,4 @@ function ValidateUser(user) {
     return schema.validate(user);
 }
 
-module.exports = { app, connectToDatabase, closeConnection, };
+module.exports = { app };

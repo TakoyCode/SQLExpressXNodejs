@@ -19,10 +19,6 @@ async function connectToDatabase() {
     catch (error) {
         console.error(error);
     }
-    // sql.connect(sqlConfig, (error) => {
-    //     if (error) console.error(error);
-    //     else console.log('Connected to database.');
-    // });
 }
 
 async function closeConnection() {
