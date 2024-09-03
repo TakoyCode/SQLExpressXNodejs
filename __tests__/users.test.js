@@ -1,5 +1,4 @@
 process.env.DATABASE = 'ExpressXNode_Test';
-// const doStuff = require("../doStuff");
 const request = require("supertest");
 const { app } = require("../app");
 const { sql, connectToDatabase, closeConnection, } = require("../db");

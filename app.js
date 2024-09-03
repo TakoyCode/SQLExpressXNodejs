@@ -3,92 +3,38 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-// importing Joi
+// Importing Joi
 const Joi = require('joi');
 
-// importing database
+// Importing database
 const { sql } = require('./db');
 
 // Setting up swagger
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsDoc = require('swagger-jsdoc');
-
-const swaggerOptions = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'SQL Express X Node.js',
-            version: '1.0.0',
-        },
-        servers: [
-            {
-                url: 'http://localhost:3000/',
-            }
-        ],
-    },
-    apis: ['./app.js'],
-}
-
-const swaggerSpec = swaggerJsDoc(swaggerOptions);
+const { swaggerUi, swaggerSpec } = require('./swagger');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-
-// --- HTTP methods ---
-
-/**
- * @swagger
- * /api/users:
- *  get:
- *      summary: To get users from SQL Express Database
- *      description: To get users from SQL Express Database
- *      responses:
- *          200:
- *              description: Succesfully got users from the SQL Express Database
- *              content:
- *                  application/json:
- *                      schema:
- *                          type: array
- *                          items:
- *                              $ref: './swaggerComponents.js/#components/schema/User'
- *              
- */
+// --- HTTP metods ---
 app.get('/api/users', async (req, res) => {
     const request = new sql.Request();
+    // Get all users
     await request.query('select * from users', (error, result) => {
+        // Checks for errors
         if (error) return res.status(400).send(error.message);
+
+        // Sends back all users
         res.send(result.recordset);
     });
 });
 
-/**
- * @swagger
- * /api/users/{id}:
- *  get:
- *      summary: To get a user from SQL Express Database
- *      description: To get a user from SQL Express Database
- *      parameters:
- *          - in: path
- *            name: id
- *            required: true
- *            description: Number ID required
- *            schema:
- *              type: integer
- *      responses:
- *          200:
- *              description: Succesfully got a user from the SQL Express Database
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: './swaggerComponents.js/#components/schema/User'
- *          204:
- *              description: Could not find user in the SQL Express Database
- */
 app.get('/api/users/:id', (req, res) => {
     const request = new sql.Request();
+    // Finds user
     request.query(`select * from users where Id = ${req.params.id}`, (error, result) => {
+        // Checks for errors / or if we didn't find a user with the id
         if (error) return res.status(400).send(error.message);
         if (result.rowsAffected <= 0) return res.status(204).send('Could not find user.');
 
+        // Sends back found user
         res.send(result.recordset[0]);
     });
 });
@@ -117,12 +63,13 @@ app.put('/api/users/:id', (req, res) => {
     const { error } = ValidateUser(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    // Creates a object with the data
+    // Deconstructs the data gotten from the req.body
     const { Name, Age, Email } = req.body;
 
     const request = new sql.Request();
+    // Check if we got a user with same id
     request.query(`select * from users where Id = ${req.params.id}`, (error, result) => {
-        // Check if we got a user
+        // Checks for errors / or if we didn't find a user with the id
         if (error) return res.status(400).send(error.message);
         if (result.rowsAffected <= 0) return res.status(204).send('Could not find user.');
 
@@ -139,22 +86,22 @@ app.put('/api/users/:id', (req, res) => {
 
 app.delete('/api/users/:id', (req, res) => {
     const request = new sql.Request();
-    //Find user
+    // Find user
     request.query(`select * from users where Id = ${req.params.id}`, (error, result) => {
-        // Check if we got a user
+        // Checks for errors / or if we didn't find a user with the id
         if (error) return res.status(400).send(error.message);
         if (result.rowsAffected <= 0) return res.status(204).send('Could not find user.');
 
         // Delete user
         request.query(`DELETE FROM users OUTPUT DELETED.* Where ID = ${parseInt(req.params.id)};`, (error, result) => {
             if (error) return res.status(400).send(error.message);
-            // Send back deleted user
+            // Sends back deleted user
             res.send(result.recordset[0]);
         });
     });
 });
 
-// Validation logic
+// Using Joi to check if received data is valid
 function ValidateUser(user) {
     const schema = Joi.object({
         Name: Joi.string().required(),

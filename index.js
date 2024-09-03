@@ -1,9 +1,13 @@
-// const { app, connectToDatabase } = require('./app');
 const { app } = require("./app");
-const { connectToDatabase } = require("./db");
+const { connectToDatabase, closeConnection } = require("./db");
 
-process.env.DATABASE = 'ExpressXNode_Test';
 connectToDatabase();
 
 const port = process.env.PORT || 5000;
 app.listen(port, () => { console.log(`Listening on port ${port}...`) });
+
+// Don't think i need this, but keeping it incase it doesn't close the connection
+process.on('SIGINT', async () => {
+    await closeConnection();
+    process.exit();
+})
