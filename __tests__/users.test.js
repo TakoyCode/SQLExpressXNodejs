@@ -26,7 +26,6 @@ afterAll(async () => {
     await closeConnection();
 })
 
-
 describe("GET /api/users", () => {
     it("should return all users", async () => {
         const response = await request(app).get('/api/users');
@@ -48,7 +47,6 @@ describe("GET /api/users/:id", () => {
         const response = await request(app).get(`/api/users/0`);
         expect(response.statusCode).toEqual(204);
     });
-
 });
 
 describe("POST /api/users", () => {
